@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.firebase)
 }
 
 android {
@@ -11,7 +12,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.gamestudio"
+        applicationId = "com.gamestudio"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -33,6 +34,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    buildFeatures{
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -41,7 +45,15 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
     testImplementation(libs.junit)
+    implementation(libs.lottie)
+    implementation(platform(libs.firebaseBom))
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth)
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.android)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

@@ -1,0 +1,123 @@
+package com.example.gamestudio.onboarding.signUp
+
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import com.example.gamestudio.R
+import com.example.gamestudio.core.FragmentCommunicator
+import com.example.gamestudio.core.ResponseService
+import com.example.gamestudio.databinding.FragmentRegisterBinding
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.launch
+import kotlin.getValue
+
+class RegisterFragment : Fragment() {
+    private var _binding: FragmentRegisterBinding? = null
+    private val binding get() = _binding!!
+
+    private val viewModel by viewModels<RegisterViewModel>()
+    private lateinit var communicator: FragmentCommunicator
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = FragmentRegisterBinding.inflate(inflater, container, false)
+        setupValidation()
+        setupClickListeners()
+        observeState()
+
+        communicator = requireActivity() as FragmentCommunicator
+
+        return binding.root
+    }
+
+    private fun setupValidation() {
+        // 1. Empezamos con el botón de "Siguiente" desactivado
+        binding.btnNextRegister.isEnabled = false
+
+        // 2. Escuchamos cambios en cada campo para validar al momento
+        binding.ResEmailTiet.addTextChangedListener { validateFields() }
+        binding.ResfPasswordTiet.addTextChangedListener { validateFields() }
+        binding.ResConfPasswordTiet.addTextChangedListener { validateFields() }
+    }
+
+    private fun validateFields() {
+        val email = binding.ResEmailTiet.text.toString().trim()
+        val pass = binding.ResfPasswordTiet.text.toString().trim()
+        val confirm = binding.ResConfPasswordTiet.text.toString().trim()
+
+        binding.ResEmailTiet.error = viewModel.validateEmail(email)
+        binding.ResfPasswordTiet.error = viewModel.validatePassword(pass)
+        binding.ResConfPasswordTiet.error = viewModel.validateConfirmPassword(pass, confirm)
+
+        // El botón de "Siguiente" se activa solo si el correo y las contraseñas están bien
+        binding.btnNextRegister.isEnabled = viewModel.isRegisterFormValid(email, pass, confirm)
+    }
+
+    private fun setupClickListeners() {
+        binding.btnNextRegister.setOnClickListener {
+            // CORRECCIÓN: Obtener el texto del campo de email, no del botón
+            val email = binding.ResEmailTiet.text.toString().trim()
+            val password = binding.ResfPasswordTiet.text.toString().trim()
+            viewModel.requestSignUp(email, password)
+        }
+    }
+
+    private fun observeState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.registerState.collect { state ->
+                    when (state) {
+                        is ResponseService.Loading -> {
+                            communicator.manageLoader(true)
+                            binding.btnNextRegister.isEnabled = false
+                        }
+
+                        is ResponseService.Success -> {
+                            communicator.manageLoader(false)
+
+                            // Pasamos el email y password al siguiente fragmento para completar el registro
+                            val email = binding.ResEmailTiet.text.toString().trim()
+                            val password = binding.ResfPasswordTiet.text.toString().trim()
+                            val bundle = bundleOf(
+                                "EMAIL" to email,
+                                "PASSWORD" to password
+                            )
+
+                            findNavController().navigate(
+                                R.id.action_registerFragment_to_personalInfoFragment,
+                                bundle
+                            )
+                        }
+
+                        is ResponseService.Error -> {
+                            communicator.manageLoader(false)
+                            binding.btnNextRegister.isEnabled = true
+                            Snackbar.make(
+                                binding.root, state.error,
+                                Snackbar.LENGTH_LONG
+                            ).show()
+                        }
+
+                        null -> Unit
+                    }
+                }
+            }
+        }
+    }
+}

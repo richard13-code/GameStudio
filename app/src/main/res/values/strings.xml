@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">GameStudio</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="app_logo">GameStudio Logo</string>"
+
+    <string name="iniciar_sesion">Iniciar Sesión</string>
+    <string name="Usuario_o_correo">Usuario o correo</string>
+    <string name="Contraseña">Contraseña</string>
+    <string name="Confirmar_contraseña">Confirmar contraseña</string>"
+
+    <string name="Olvidaste_contraseña">¿Olvidaste tu contraseña?</string>
+    <string name="Ingresar">Ingresar</string>
+
+    <string name="No_cuenta">¿No tienes una cuenta?</string>
+    <string name="Registrate">Registrate</string>
+
+    <string name="Crear_cuenta">Crear Cuenta</string>
+    <string name="Registrarse">Únete y empiaza tu aventura</string>
+    <string name="Desc">Flecha de regreso</string>
+
 </resources>

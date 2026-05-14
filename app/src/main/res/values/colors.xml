@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="primary_dark">#5B21B6</color>
+    <color name="primary">#7C3AED</color>
+    <color name="primary_light">#A78BFA</color>
+
+    <color name="accent_rating">#F59E0B</color>
+    <color name="success">#10B981</color>
+    <color name="highlight">#EC4899</color>
+
+    <color name="text_main">#0F172A</color>
+    <color name="text_secondary">#64748B</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <color name="button_text_color">#FFFFFF</color>
+    <color name="button_background">#D3D3D3</color>
 </resources>
