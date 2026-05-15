@@ -7,4 +7,6 @@ interface Authentication {
     suspend fun requestLogin(email: String, password: String): ResponseService<FirebaseUser>
     suspend fun requestSignIn(email: String, password: String): ResponseService<FirebaseUser>
     suspend fun saveUserProfile(profile: UserProfile): ResponseService<Unit>
+    suspend fun getUserProfile(userId: String): ResponseService<UserProfile>
+    suspend fun updateUsername(userId: String, newUsername: String): ResponseService<Unit>
 }

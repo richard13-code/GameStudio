@@ -59,4 +59,27 @@ class AuthRepository(): Authentication {
             ResponseService.Error("Error al guardar el perfil: ${e.message}")
         }
     }
+
+    override suspend fun getUserProfile(userId: String): ResponseService<UserProfile> = withContext(Dispatchers.IO) {
+        try {
+            val snapshot = firestore.collection("users").document(userId).get().await()
+            val profile = snapshot.toObject(UserProfile::class.java)
+            if (profile != null) {
+                ResponseService.Success(profile)
+            } else {
+                ResponseService.Error("Perfil no encontrado")
+            }
+        } catch (e: Exception) {
+            ResponseService.Error("Error al obtener perfil: ${e.message}")
+        }
+    }
+
+    override suspend fun updateUsername(userId: String, newUsername: String): ResponseService<Unit> = withContext(Dispatchers.IO) {
+        try {
+            firestore.collection("users").document(userId).update("userName", newUsername).await()
+            ResponseService.Success(Unit)
+        } catch (e: Exception) {
+            ResponseService.Error("Error al actualizar nombre de usuario: ${e.message}")
+        }
+    }
 }

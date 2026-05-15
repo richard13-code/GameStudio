@@ -20,6 +20,16 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupRecyclerView()
+    }
+
+    private fun setupRecyclerView() {
+        val games = List(6) { Game("Resumen del juego de prueba número ${it + 1}. Este es un texto descriptivo que se expande al hacer clic en la tarjeta.") }
+        binding.rvGamesNeon.adapter = GameAdapter(games)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

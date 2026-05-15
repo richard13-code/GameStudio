@@ -1,8 +1,20 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.GameStudio" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Neon Colors -->
+        <item name="colorPrimary">@color/neon_purple</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorPrimaryVariant">@color/neon_purple_variant</item>
+
+        <item name="colorSecondary">@color/white</item>
+        <item name="colorOnSecondary">@color/black</item>
+
+        <item name="android:windowBackground">@color/neon_black</item>
+        <item name="android:statusBarColor">@color/neon_black</item>
+
+        <!-- Surface colors -->
+        <item name="colorSurface">@color/neon_black</item>
+        <item name="colorOnSurface">@color/white</item>
     </style>
 
     <style name="Theme.GameStudio" parent="Base.Theme.GameStudio" />

@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary_dark">#2E1065</color>
-    <color name="primary">#6D28D9</color>
-    <color name="primary_light">#8B5CF6</color>
-
-    <color name="accent_rating">#F59E0B</color>
-    <color name="success">#10B981</color>
-    <color name="highlight">#EC4899</color>
-
-    <color name="text_main">#0F172A</color>
-    <color name="text_secondary">#64748B</color>
-
+    <!-- Neon Palette: Black, Purple, White -->
+    <color name="neon_black">#000000</color>
+    <color name="neon_purple">#BB86FC</color>
+    <color name="neon_purple_variant">#6200EE</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
 
-    <color name="button_text_color">#FFFFFF</color>
-    <color name="button_background">#D3D3D3</color>
+    <!-- UI Mapping -->
+    <color name="colorPrimary">#BB86FC</color>
+    <color name="colorPrimaryVariant">#6200EE</color>
+    <color name="colorOnPrimary">#000000</color>
+    <color name="colorSecondary">#FFFFFF</color>
+    <color name="colorOnSecondary">#000000</color>
+    <color name="android_windowBackground">#000000</color>
+
+    <!-- Legacy compatibility if needed by layouts -->
+    <color name="primary">#BB86FC</color>
+    <color name="primary_dark">#6200EE</color>
+    <color name="background_dark">#000000</color>
+    <color name="button_text_color">#000000</color>
 </resources>
