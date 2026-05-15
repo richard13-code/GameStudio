@@ -53,7 +53,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView6"
             app:startIconDrawable="@drawable/ic_person"
-            app:startIconTint="@color/black">
+            app:startIconTint="@color/primary"
+            app:boxStrokeColor="@color/primary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/emailTiet"
@@ -82,8 +83,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tilUser"
             app:startIconDrawable="@drawable/ic_lock"
-            app:startIconTint="@color/black"
-            app:endIconTint="@color/black"
+            app:startIconTint="@color/primary"
+            app:endIconTint="@color/primary"
+            app:boxStrokeColor="@color/primary"
             android:scrollbars="none">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -104,7 +106,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="32dp"
             android:text="@string/Olvidaste_contraseña"
-            android:textColor="@color/primary_dark"
+            android:textColor="@color/primary"
             android:clickable="true"
             android:focusable="true"
             android:background="?attr/selectableItemBackground"
@@ -148,7 +150,7 @@
             android:clickable="true"
             android:focusable="true"
             android:text="@string/Registrate"
-            android:textColor="@color/primary_dark"
+            android:textColor="@color/primary"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

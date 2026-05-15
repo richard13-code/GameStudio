@@ -1,6 +1,7 @@
 package com.example.gamestudio.onboarding.signIn
 
 import android.content.Intent
+import com.example.gamestudio.ui.main.HomeActivity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -90,9 +91,9 @@ class LoginFragment : Fragment() {
                         is ResponseService.Success -> {
                             communicator.manageLoader(false)
                             Toast.makeText(requireContext(), "¡Sesión Iniciada!", Toast.LENGTH_LONG).show()
-                             //val intent = Intent(requireContext(), HomeActivity::class.java)
-                            //intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            //startActivity(intent)
+                            val intent = Intent(requireContext(), HomeActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
                         }
                         is ResponseService.Error -> {
                             communicator.manageLoader(false)

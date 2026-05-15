@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed"
             android:text="@string/Registrarse"
-            android:textColor="@color/primary_light"
+            android:textColor="@color/primary"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -79,9 +79,9 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView2"
-
             app:startIconDrawable="@drawable/ic_person"
-            app:startIconTint="@color/black">
+            app:startIconTint="@color/primary"
+            app:boxStrokeColor="@color/primary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ResEmailTiet"
@@ -110,8 +110,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/ResUser"
             app:startIconDrawable="@drawable/ic_lock"
-            app:startIconTint="@color/black"
-            app:endIconTint="@color/black">
+            app:startIconTint="@color/primary"
+            app:endIconTint="@color/primary"
+            app:boxStrokeColor="@color/primary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ResfPasswordTiet"
@@ -140,8 +141,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/ResPassword"
             app:startIconDrawable="@drawable/ic_lock"
-            app:startIconTint="@color/black"
-            app:endIconTint="@color/black">
+            app:startIconTint="@color/primary"
+            app:endIconTint="@color/primary"
+            app:boxStrokeColor="@color/primary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ResConfPasswordTiet"

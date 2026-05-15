@@ -1,5 +1,6 @@
 package com.example.gamestudio.core
 
+import com.example.gamestudio.onboarding.personal.model.UserProfile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
@@ -12,8 +13,8 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 class AuthRepository(): Authentication {
-    val auth = FirebaseAuth.getInstance()
-    val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
 
     override suspend fun requestLogin(
         email: String, password: String
@@ -44,10 +45,18 @@ class AuthRepository(): Authentication {
         } catch (e: FirebaseAuthWeakPasswordException) {
             ResponseService.Error("La contraseña es muy débil")
         } catch (e: FirebaseAuthException) {
-            // ESTO TE DARÁ LA RAZÓN REAL (Ej: Correo mal formado, error de red, etc.)
-            ResponseService.Error(e.localizedMessage ?: "Error de autenticación")
+            ResponseService.Error("Error de Firebase (${e.errorCode}): ${e.localizedMessage}")
         } catch (e: Exception) {
-            ResponseService.Error("Error crítico: ${e.message}")
+            ResponseService.Error("Error inesperado (${e.javaClass.simpleName}): ${e.message}")
+        }
+    }
+
+    override suspend fun saveUserProfile(profile: UserProfile): ResponseService<Unit> = withContext(Dispatchers.IO) {
+        try {
+            firestore.collection("users").document(profile.id).set(profile).await()
+            ResponseService.Success(Unit)
+        } catch (e: Exception) {
+            ResponseService.Error("Error al guardar el perfil: ${e.message}")
         }
     }
 }
