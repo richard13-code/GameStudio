@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.gamestudio.core.ResponseService
 import com.example.gamestudio.databinding.FragmentProfileBinding
+import com.google.firebase.auth.FirebaseAuth
 
 class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
@@ -33,7 +34,8 @@ class ProfileFragment : Fragment() {
 
     private fun setupClickListeners() {
         binding.btnLogout.setOnClickListener {
-            // Lógica de cerrar sesión
+            FirebaseAuth.getInstance().signOut()
+            requireActivity().finish()
         }
 
         binding.btnExit.setOnClickListener {
@@ -57,11 +59,11 @@ class ProfileFragment : Fragment() {
                 is ResponseService.Success -> {
                     val profile = response.data
                     binding.etUsername.setText(profile.userName)
-                    binding.etEmail.setText(profile.id) // ID del documento (UID de Firebase)
+                    // Obtenemos el email directamente de Firebase Auth
+                    binding.etEmail.setText(FirebaseAuth.getInstance().currentUser?.email ?: "No disponible")
                     binding.etPhone.setText(profile.phone)
                 }
                 is ResponseService.Error -> {
-                    // Muestra el error exacto para diagnosticar
                     val errorMsg = "Error al cargar perfil: ${response.error}"
                     Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
                     binding.etUsername.setHint(errorMsg)

@@ -70,6 +70,11 @@ class RegisterFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
+        // Lógica para regresar al Login
+        binding.imageView2.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
         binding.btnNextRegister.setOnClickListener {
             // CORRECCIÓN: Obtener el texto del campo de email, no del botón
             val email = binding.ResEmailTiet.text.toString().trim()
