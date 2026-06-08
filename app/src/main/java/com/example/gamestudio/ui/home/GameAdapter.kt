@@ -1,31 +1,53 @@
 package com.example.gamestudio.ui.home
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.gamestudio.databinding.ItemGameNeonBinding
+import com.bumptech.glide.Glide
+import com.example.gamestudio.databinding.ItemGameBinding
+import com.example.gamestudio.model.Game
 
-data class Game(val summary: String)
+class GameAdapter(
+    private val onItemClick: (Game) -> Unit = {}
+) : ListAdapter<Game, GameAdapter.GridViewHolder>(DIFF) {
 
-class GameAdapter(private val games: List<Game>) : RecyclerView.Adapter<GameAdapter.ViewHolder>() {
+    // 1. Se elimina getItemViewType porque ya solo hay un tipo de vista
 
-    class ViewHolder(val binding: ItemGameNeonBinding) : RecyclerView.ViewHolder(binding.root)
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemGameNeonBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return ViewHolder(binding)
+    // 2. Simplificamos onCreateViewHolder para que solo infle el diseño de Grid
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GridViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val binding = ItemGameBinding.inflate(inflater, parent, false)
+        return GridViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val game = games[position]
-        holder.binding.tvGameSummary.text = game.summary
-        
-        holder.itemView.setOnClickListener {
-            val isVisible = holder.binding.tvGameSummary.visibility == View.VISIBLE
-            holder.binding.tvGameSummary.visibility = if (isVisible) View.GONE else View.VISIBLE
+    // 3. Simplificamos onBindViewHolder
+    override fun onBindViewHolder(holder: GridViewHolder, position: Int) {
+        val game = getItem(position)
+        holder.bind(game)
+    }
+
+    // El ViewHolder permanece igual, usando las variables correctas (name y backgroundImage)
+    inner class GridViewHolder(private val binding: ItemGameBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(game: Game) {
+            binding.tvTitle.text = game.name
+
+            Glide.with(binding.ivCover.context)
+                .load(game.backgroundImage)
+                .centerCrop()
+                .into(binding.ivCover)
+
+            binding.root.setOnClickListener { onItemClick(game) }
         }
     }
 
-    override fun getItemCount() = games.size
+    companion object {
+        private val DIFF = object : DiffUtil.ItemCallback<Game>() {
+            override fun areItemsTheSame(oldItem: Game, newItem: Game) = oldItem.id == newItem.id
+            override fun areContentsTheSame(oldItem: Game, newItem: Game) = oldItem == newItem
+        }
+    }
 }
