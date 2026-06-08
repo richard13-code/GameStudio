@@ -7,11 +7,10 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface GameApi {
-
     @GET("games")
     suspend fun getGames(
         @Query("key") apiKey: String = BuildConfig.RAWG_API_KEY,
-        @Query("page_size") pageSize: Int? = null,
+        @Query("page_size") pageSize: Int? = 20,
         @Query("search") search: String? = null
     ): Response<GameResponse>
 }
