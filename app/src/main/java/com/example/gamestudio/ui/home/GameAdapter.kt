@@ -13,22 +13,15 @@ class GameAdapter(
     private val onItemClick: (Game) -> Unit = {}
 ) : ListAdapter<Game, GameAdapter.GridViewHolder>(DIFF) {
 
-    // 1. Se elimina getItemViewType porque ya solo hay un tipo de vista
-
-    // 2. Simplificamos onCreateViewHolder para que solo infle el diseño de Grid
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GridViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        val binding = ItemGameBinding.inflate(inflater, parent, false)
+        val binding = ItemGameBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return GridViewHolder(binding)
     }
 
-    // 3. Simplificamos onBindViewHolder
     override fun onBindViewHolder(holder: GridViewHolder, position: Int) {
-        val game = getItem(position)
-        holder.bind(game)
+        holder.bind(getItem(position))
     }
 
-    // El ViewHolder permanece igual, usando las variables correctas (name y backgroundImage)
     inner class GridViewHolder(private val binding: ItemGameBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
@@ -38,6 +31,7 @@ class GameAdapter(
             Glide.with(binding.ivCover.context)
                 .load(game.backgroundImage)
                 .centerCrop()
+                .placeholder(com.example.gamestudio.R.drawable.ic_launcher_background)
                 .into(binding.ivCover)
 
             binding.root.setOnClickListener { onItemClick(game) }

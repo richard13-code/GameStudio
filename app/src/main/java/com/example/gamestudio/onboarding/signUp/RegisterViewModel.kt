@@ -11,23 +11,23 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class RegisterViewModel: ViewModel() {
+class RegisterViewModel : ViewModel() {
+
     private val authRepository = AuthRepository()
 
     private val _registerState = MutableStateFlow<ResponseService<FirebaseUser>?>(null)
     val registerState: StateFlow<ResponseService<FirebaseUser>?> = _registerState.asStateFlow()
 
-
-    // --- Validación ---
     fun validateEmail(email: String): String? {
         if (email.isBlank()) return "El correo es requerido"
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches())
-            return "Correo inválido"
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) return "Correo inválido"
         return null
     }
+
     fun validatePassword(password: String): String? {
         if (password.isBlank()) return "La contraseña es requerida"
         if (password.length < 8) return "Mínimo 8 caracteres"
+        if (!password.any { it.isDigit() }) return "Debe incluir al menos un número"
         return null
     }
 
@@ -37,23 +37,15 @@ class RegisterViewModel: ViewModel() {
         return null
     }
 
-    fun isRegisterFormValid(
-        email: String, password: String, confirm: String
-    ): Boolean {
-        return validateEmail(email) == null &&
+    fun isRegisterFormValid(email: String, password: String, confirm: String) =
+        validateEmail(email) == null &&
                 validatePassword(password) == null &&
                 validateConfirmPassword(password, confirm) == null
-    }
 
-    // --- Operación de registro ---
     fun requestSignUp(email: String, password: String) {
         viewModelScope.launch {
             _registerState.value = ResponseService.Loading
-
-            // 1. Intentamos crear el usuario
-            val result = authRepository.requestSignIn(email, password)
-
-            _registerState.value = result
+            _registerState.value = authRepository.requestSignUp(email, password)
         }
     }
 }

@@ -1,12 +1,11 @@
 package com.example.gamestudio.onboarding.signUp
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -18,68 +17,51 @@ import com.example.gamestudio.core.ResponseService
 import com.example.gamestudio.databinding.FragmentRegisterBinding
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
-import kotlin.getValue
 
 class RegisterFragment : Fragment() {
+
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel by viewModels<RegisterViewModel>()
     private lateinit var communicator: FragmentCommunicator
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentRegisterBinding.inflate(inflater, container, false)
+        communicator = requireActivity() as FragmentCommunicator
         setupValidation()
         setupClickListeners()
         observeState()
-
-        communicator = requireActivity() as FragmentCommunicator
-
         return binding.root
     }
 
     private fun setupValidation() {
-        // 1. Empezamos con el botón de "Siguiente" desactivado
-        binding.btnNextRegister.isEnabled = false
-
-        // 2. Escuchamos cambios en cada campo para validar al momento
-        binding.ResEmailTiet.addTextChangedListener { validateFields() }
-        binding.ResfPasswordTiet.addTextChangedListener { validateFields() }
-        binding.ResConfPasswordTiet.addTextChangedListener { validateFields() }
+        binding.signInButton.isEnabled = false
+        binding.emailTiet.addTextChangedListener { validateAndEnable() }
+        binding.passwordTiet.addTextChangedListener { validateAndEnable() }
+        binding.confirmPasswordTiet.addTextChangedListener { validateAndEnable() }
     }
 
-    private fun validateFields() {
-        val email = binding.ResEmailTiet.text.toString().trim()
-        val pass = binding.ResfPasswordTiet.text.toString().trim()
-        val confirm = binding.ResConfPasswordTiet.text.toString().trim()
-
-        binding.ResEmailTiet.error = viewModel.validateEmail(email)
-        binding.ResfPasswordTiet.error = viewModel.validatePassword(pass)
-        binding.ResConfPasswordTiet.error = viewModel.validateConfirmPassword(pass, confirm)
-
-        // El botón de "Siguiente" se activa solo si el correo y las contraseñas están bien
-        binding.btnNextRegister.isEnabled = viewModel.isRegisterFormValid(email, pass, confirm)
+    private fun validateAndEnable() {
+        val email = binding.emailTiet.text.toString().trim()
+        val pass = binding.passwordTiet.text.toString().trim()
+        val confirm = binding.confirmPasswordTiet.text.toString().trim()
+        binding.emailTil.error = viewModel.validateEmail(email)
+        binding.passwordTil.error = viewModel.validatePassword(pass)
+        binding.confirmPasswordTil.error = viewModel.validateConfirmPassword(pass, confirm)
+        binding.signInButton.isEnabled = viewModel.isRegisterFormValid(email, pass, confirm)
     }
 
     private fun setupClickListeners() {
-        // Lógica para regresar al Login
-        binding.imageView2.setOnClickListener {
-            findNavController().popBackStack()
-        }
-
-        binding.btnNextRegister.setOnClickListener {
-            // CORRECCIÓN: Obtener el texto del campo de email, no del botón
-            val email = binding.ResEmailTiet.text.toString().trim()
-            val password = binding.ResfPasswordTiet.text.toString().trim()
+        binding.signInButton.setOnClickListener {
+            val email = binding.emailTiet.text.toString().trim()
+            val password = binding.passwordTiet.text.toString().trim()
             viewModel.requestSignUp(email, password)
+        }
+        binding.registerText.setOnClickListener {
+            findNavController().navigateUp()
         }
     }
 
@@ -90,39 +72,26 @@ class RegisterFragment : Fragment() {
                     when (state) {
                         is ResponseService.Loading -> {
                             communicator.manageLoader(true)
-                            binding.btnNextRegister.isEnabled = false
+                            binding.signInButton.isEnabled = false
                         }
-
                         is ResponseService.Success -> {
                             communicator.manageLoader(false)
-
-                            // Pasamos el email y password al siguiente fragmento para completar el registro
-                            val email = binding.ResEmailTiet.text.toString().trim()
-                            val password = binding.ResfPasswordTiet.text.toString().trim()
-                            val bundle = bundleOf(
-                                "EMAIL" to email,
-                                "PASSWORD" to password
-                            )
-
-                            findNavController().navigate(
-                                R.id.action_registerFragment_to_personalInfoFragment,
-                                bundle
-                            )
+                            findNavController().navigate(R.id.action_registerFragment_to_personalInfoFragment)
                         }
-
                         is ResponseService.Error -> {
                             communicator.manageLoader(false)
-                            binding.btnNextRegister.isEnabled = true
-                            Snackbar.make(
-                                binding.root, state.error,
-                                Snackbar.LENGTH_LONG
-                            ).show()
+                            binding.signInButton.isEnabled = true
+                            Snackbar.make(binding.root, state.error, Snackbar.LENGTH_LONG).show()
                         }
-
                         null -> Unit
                     }
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

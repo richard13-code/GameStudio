@@ -1,14 +1,12 @@
 package com.example.gamestudio.onboarding.signIn
 
 import android.content.Intent
-import com.example.gamestudio.ui.main.HomeActivity
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -18,56 +16,40 @@ import com.example.gamestudio.R
 import com.example.gamestudio.core.FragmentCommunicator
 import com.example.gamestudio.core.ResponseService
 import com.example.gamestudio.databinding.FragmentLoginBinding
+import com.example.gamestudio.ui.main.HomeActivity
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
-import kotlin.getValue
 
 class LoginFragment : Fragment() {
-    private var _binding : FragmentLoginBinding? = null
+
+    private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
-
-    private val viewModel by viewModels<SignInViewModel>() //Enlace con el binding y viewmodel
-
+    private val viewModel by viewModels<SignInViewModel>()
     private lateinit var communicator: FragmentCommunicator
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
-        communicator = activity as FragmentCommunicator
+        communicator = requireActivity() as FragmentCommunicator
         setupValidation()
         setupClickListeners()
         observeState()
-
-        binding.textRegister.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
-        }
         return binding.root
     }
 
-    private fun setupValidation(){
+    private fun setupValidation() {
         binding.signInButton.isEnabled = false
-
-        binding.emailTiet.addTextChangedListener {
-            validateFields()
-        }
-        binding.passwordTiet.addTextChangedListener {
-            validateFields()
-        }
+        binding.emailTiet.addTextChangedListener { validateAndEnable() }
+        binding.passwordTiet.addTextChangedListener { validateAndEnable() }
     }
 
-    private fun validateFields() {
+    private fun validateAndEnable() {
         val email = binding.emailTiet.text.toString().trim()
         val password = binding.passwordTiet.text.toString().trim()
-
-        binding.emailTiet.error = viewModel.validateEmail(email)
-        binding.passwordTiet.error = viewModel.validatePassword(password)
+        binding.emailTil.error = viewModel.validateEmail(email)
+        binding.passwordTil.error = viewModel.validatePassword(password)
         binding.signInButton.isEnabled = viewModel.isLoginFormValid(email, password)
     }
 
@@ -76,6 +58,9 @@ class LoginFragment : Fragment() {
             val email = binding.emailTiet.text.toString().trim()
             val password = binding.passwordTiet.text.toString().trim()
             viewModel.requestLogin(email, password)
+        }
+        binding.registerText.setOnClickListener {
+            findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
         }
     }
 
@@ -90,16 +75,15 @@ class LoginFragment : Fragment() {
                         }
                         is ResponseService.Success -> {
                             communicator.manageLoader(false)
-                            Toast.makeText(requireContext(), "¡Sesión Iniciada!", Toast.LENGTH_LONG).show()
-                            val intent = Intent(requireContext(), HomeActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            val intent = Intent(requireContext(), HomeActivity::class.java).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            }
                             startActivity(intent)
                         }
                         is ResponseService.Error -> {
                             communicator.manageLoader(false)
                             binding.signInButton.isEnabled = true
-                            Snackbar.make(binding.root, state.error,
-                                Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(binding.root, state.error, Snackbar.LENGTH_LONG).show()
                         }
                         null -> Unit
                     }
@@ -108,4 +92,8 @@ class LoginFragment : Fragment() {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

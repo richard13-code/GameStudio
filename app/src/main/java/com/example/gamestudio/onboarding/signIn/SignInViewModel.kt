@@ -11,15 +11,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class SignInViewModel: ViewModel() {
-    val repository = AuthRepository()
+class SignInViewModel : ViewModel() {
+
+    private val repository = AuthRepository()
 
     private val _signInState = MutableStateFlow<ResponseService<FirebaseUser>?>(null)
     val signInState: StateFlow<ResponseService<FirebaseUser>?> = _signInState.asStateFlow()
+
     fun validateEmail(email: String): String? {
         if (email.isBlank()) return "El correo es requerido"
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches())
-            return "Correo inválido"
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) return "Correo inválido"
         return null
     }
 
@@ -29,22 +30,13 @@ class SignInViewModel: ViewModel() {
         return null
     }
 
-    fun isLoginFormValid(email: String, password: String): Boolean {
-        return validateEmail(email) == null &&
-                validatePassword(password) == null
-    }
+    fun isLoginFormValid(email: String, password: String) =
+        validateEmail(email) == null && validatePassword(password) == null
 
-    // --- Operación de login ---
     fun requestLogin(email: String, password: String) {
         viewModelScope.launch {
             _signInState.value = ResponseService.Loading
-            try {
-                val result = repository.requestLogin(email, password)
-                _signInState.value = result
-            } catch (e: Exception) {
-                // Si el internet se corta o hay un crash, avisamos al fragment
-                _signInState.value = ResponseService.Error("Error de conexión: ${e.localizedMessage}")
-            }
+            _signInState.value = repository.requestLogin(email, password)
         }
     }
 }

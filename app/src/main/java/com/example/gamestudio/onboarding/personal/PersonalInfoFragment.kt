@@ -1,93 +1,135 @@
 package com.example.gamestudio.onboarding.personal
 
-import android.content.Intent
 import android.app.DatePickerDialog
-import com.example.gamestudio.ui.main.HomeActivity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.example.gamestudio.R
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.gamestudio.core.FragmentCommunicator
 import com.example.gamestudio.core.ResponseService
 import com.example.gamestudio.databinding.FragmentPersonalInfoBinding
-import java.util.*
+import com.example.gamestudio.ui.main.HomeActivity
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
+import java.util.Calendar
 
 class PersonalInfoFragment : Fragment() {
 
     private var _binding: FragmentPersonalInfoBinding? = null
     private val binding get() = _binding!!
-
-    private val viewModel: PersonalInfoViewModel by viewModels()
+    private val viewModel by viewModels<PersonalInfoViewModel>()
+    private lateinit var communicator: FragmentCommunicator
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentPersonalInfoBinding.inflate(inflater, container, false)
+        communicator = requireActivity() as FragmentCommunicator
+        setupValidation()
+        setupDatePicker()
+        setupClickListeners()
+        observeState()
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        setupListeners()
-        setupObservers()
+    private fun setupValidation() {
+        binding.saveButton.isEnabled = false
+        binding.firstNameTiet.addTextChangedListener { validateAndEnable() }
+        binding.lastNameTiet.addTextChangedListener { validateAndEnable() }
+        binding.usernameTiet.addTextChangedListener { validateAndEnable() }
+        binding.phoneTiet.addTextChangedListener { validateAndEnable() }
+        binding.birthDateTiet.addTextChangedListener { validateAndEnable() }
     }
 
-    private fun setupListeners() {
-        binding.etBirthDate.setOnClickListener {
-            showDatePicker()
-        }
+    private fun validateAndEnable() {
+        val firstName = binding.firstNameTiet.text.toString().trim()
+        val lastName = binding.lastNameTiet.text.toString().trim()
+        val username = binding.usernameTiet.text.toString().trim()
+        val phone = binding.phoneTiet.text.toString().trim()
+        val birthDate = binding.birthDateTiet.text.toString().trim()
 
-        binding.btnSave.setOnClickListener {
+        binding.firstNameTil.error = viewModel.validateFirstName(firstName)
+        binding.lastNameTil.error = viewModel.validateLastName(lastName)
+        binding.usernameTil.error = viewModel.validateUsername(username)
+        binding.phoneTil.error = viewModel.validatePhone(phone)
+        binding.birthDateTil.error = viewModel.validateBirthDate(birthDate)
+
+        binding.saveButton.isEnabled =
+            viewModel.isFormValid(firstName, lastName, username, phone, birthDate)
+    }
+
+    private fun setupDatePicker() {
+        binding.birthDateTiet.setOnClickListener {
+            val cal = Calendar.getInstance()
+            DatePickerDialog(
+                requireContext(),
+                { _, year, month, day ->
+                    binding.birthDateTiet.setText("%04d-%02d-%02d".format(year, month + 1, day))
+                },
+                cal.get(Calendar.YEAR) - 18,
+                cal.get(Calendar.MONTH),
+                cal.get(Calendar.DAY_OF_MONTH)
+            ).apply {
+                datePicker.maxDate = System.currentTimeMillis()
+            }.show()
+        }
+    }
+
+    private fun setupClickListeners() {
+        binding.saveButton.setOnClickListener {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid
+            val email = FirebaseAuth.getInstance().currentUser?.email ?: ""
+            if (uid == null) {
+                Snackbar.make(binding.root, "Sesión inválida", Snackbar.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
             viewModel.saveProfile(
-                firstName = binding.etFirstName.text.toString(),
-                lastName = binding.etLastName.text.toString(),
-                userName = binding.etUserName.text.toString(),
-                phone = binding.etPhone.text.toString(),
-                birthDate = binding.etBirthDate.text.toString()
+                uid = uid,
+                email = email,
+                firstName = binding.firstNameTiet.text.toString().trim(),
+                lastName = binding.lastNameTiet.text.toString().trim(),
+                username = binding.usernameTiet.text.toString().trim(),
+                phone = binding.phoneTiet.text.toString().trim(),
+                birthDate = binding.birthDateTiet.text.toString().trim()
             )
         }
     }
 
-    private fun setupObservers() {
-        viewModel.saveStatus.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is ResponseService.Loading -> {
-                    (activity as? FragmentCommunicator)?.manageLoader(isVisible = true)
-                }
-                is ResponseService.Success -> {
-                    (activity as? FragmentCommunicator)?.manageLoader(isVisible = false)
-                    Toast.makeText(context, "Perfil guardado correctamente", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(requireContext(), HomeActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                }
-                is ResponseService.Error -> {
-                    (activity as? FragmentCommunicator)?.manageLoader(false)
-                    Toast.makeText(context, response.error, Toast.LENGTH_SHORT).show()
+    private fun observeState() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.saveState.collect { state ->
+                    when (state) {
+                        is ResponseService.Loading -> {
+                            communicator.manageLoader(true)
+                            binding.saveButton.isEnabled = false
+                        }
+                        is ResponseService.Success -> {
+                            communicator.manageLoader(false)
+                            val intent = Intent(requireContext(), HomeActivity::class.java).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            }
+                            startActivity(intent)
+                        }
+                        is ResponseService.Error -> {
+                            communicator.manageLoader(false)
+                            binding.saveButton.isEnabled = true
+                            Snackbar.make(binding.root, state.error, Snackbar.LENGTH_LONG).show()
+                        }
+                        null -> Unit
+                    }
                 }
             }
         }
-    }
-
-    private fun showDatePicker() {
-        val calendar = Calendar.getInstance()
-        // Establecer fecha por defecto: Enero de 2008
-        calendar.set(2008, Calendar.JANUARY, 1)
-
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-
-        DatePickerDialog(requireContext(), { _, selectedYear, selectedMonth, selectedDay ->
-            val date = String.format(Locale.getDefault(), "%02d/%02d/%04d", selectedDay, selectedMonth + 1, selectedYear)
-            binding.etBirthDate.setText(date)
-        }, year, month, day).show()
     }
 
     override fun onDestroyView() {
