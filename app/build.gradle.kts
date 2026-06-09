@@ -2,24 +2,21 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.firebase)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
     namespace = "com.example.gamestudio"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.gamestudio"
+        applicationId = "com.example.gamestudio"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         val localProperties = Properties()
@@ -27,9 +24,8 @@ android {
         if (localPropertiesFile.exists()) {
             localProperties.load(localPropertiesFile.inputStream())
         }
-
-        val apiKey = localProperties.getProperty("RAWG_API_KEY") ?: "\"\""
-        buildConfigField("String", "RAWG_API_KEY", apiKey)
+        val rawgKey = localProperties.getProperty("RAWG_API_KEY") ?: ""
+        buildConfigField("String", "RAWG_API_KEY", "\"$rawgKey\"")
     }
 
     buildTypes {
@@ -45,7 +41,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    buildFeatures{
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+    buildFeatures {
         viewBinding = true
         buildConfig = true
     }
@@ -59,19 +58,17 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
-    testImplementation(libs.junit)
     implementation(libs.lottie)
     implementation(platform(libs.firebaseBom))
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
     implementation(libs.okhttp.logging)
     implementation(libs.glide)
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

@@ -12,36 +12,25 @@ class UserRepository : UserService {
     private val firestore = FirebaseFirestore.getInstance()
     private val userCollection = firestore.collection("users")
 
-    override suspend fun saveUserInfo(userProfile: UserProfile): ResponseService<Unit> = withContext(
-        Dispatchers.IO) {
-        try {
-            userCollection.document(userProfile.id)
-                .set(userProfile)
-                .await()
-            ResponseService.Success(Unit)
-        } catch (e: Exception) {
-            ResponseService.Error("No se pudo crear el perfil: ${e.localizedMessage}")
-        }
-    }
-
-    override suspend fun getUserInfo(uid: String): ResponseService<UserProfile> = withContext(Dispatchers.IO) {
-        try {
-            val document = userCollection.document(uid).get().await()
-            if (document.exists()) {
-                // Aquí es donde sucede la conversión
-                val userProfile = document.toObject(UserProfile::class.java)
-                if (userProfile != null) {
-                    ResponseService.Success(userProfile)
-                } else {
-                    ResponseService.Error("Error: Los datos no coinciden con el modelo")
-                }
-            } else {
-                ResponseService.Error("No se encontró el documento en Firestore")
+    override suspend fun saveUserInfo(userProfile: UserProfile): ResponseService<Unit> =
+        withContext(Dispatchers.IO) {
+            try {
+                userCollection.document(userProfile.id).set(userProfile).await()
+                ResponseService.Success(Unit)
+            } catch (e: Exception) {
+                ResponseService.Error("No se pudo crear el perfil: ${e.localizedMessage}")
             }
-        } catch (e: Exception) {
-            ResponseService.Error(e.localizedMessage ?: "Error de conexión")
         }
-    }
 
-
+    override suspend fun getUserInfo(uid: String): ResponseService<UserProfile> =
+        withContext(Dispatchers.IO) {
+            try {
+                val document = userCollection.document(uid).get().await()
+                val userProfile = document.toObject(UserProfile::class.java)
+                if (userProfile != null) ResponseService.Success(userProfile)
+                else ResponseService.Error("No se encontró el documento en Firestore")
+            } catch (e: Exception) {
+                ResponseService.Error(e.localizedMessage ?: "Error de conexión")
+            }
+        }
 }

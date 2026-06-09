@@ -12,7 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-class AuthRepository(): Authentication {
+class AuthRepository : Authentication {
+
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
 
@@ -28,58 +29,47 @@ class AuthRepository(): Authentication {
         } catch (e: FirebaseAuthException) {
             ResponseService.Error(e.localizedMessage ?: "Error de autenticación")
         } catch (e: Exception) {
-            ResponseService.Error("Error inesperado. Intenta de nuevo")
+            ResponseService.Error("Error de conexión. Verifica tu internet")
         }
     }
 
-    override suspend fun requestSignIn(
-        email: String,
-        password: String
+    override suspend fun requestSignUp(
+        email: String, password: String
     ): ResponseService<FirebaseUser> = withContext(Dispatchers.IO) {
         try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()
             result.user?.let { ResponseService.Success(it) }
                 ?: ResponseService.Error("No se pudo crear el usuario")
         } catch (e: FirebaseAuthUserCollisionException) {
-            ResponseService.Error("Este correo ya está registrado, intenta con otro")
+            ResponseService.Error("Este correo ya está registrado")
         } catch (e: FirebaseAuthWeakPasswordException) {
-            ResponseService.Error("La contraseña es muy débil")
+            ResponseService.Error("La contraseña es muy débil (mínimo 8 caracteres)")
         } catch (e: FirebaseAuthException) {
-            ResponseService.Error("Error de Firebase (${e.errorCode}): ${e.localizedMessage}")
+            ResponseService.Error("Error de Firebase: ${e.localizedMessage}")
         } catch (e: Exception) {
-            ResponseService.Error("Error inesperado (${e.javaClass.simpleName}): ${e.message}")
+            ResponseService.Error("Error inesperado. Intenta de nuevo")
         }
     }
 
-    override suspend fun saveUserProfile(profile: UserProfile): ResponseService<Unit> = withContext(Dispatchers.IO) {
-        try {
-            firestore.collection("users").document(profile.id).set(profile).await()
-            ResponseService.Success(Unit)
-        } catch (e: Exception) {
-            ResponseService.Error("Error al guardar el perfil: ${e.message}")
-        }
-    }
-
-    override suspend fun getUserProfile(userId: String): ResponseService<UserProfile> = withContext(Dispatchers.IO) {
-        try {
-            val snapshot = firestore.collection("users").document(userId).get().await()
-            val profile = snapshot.toObject(UserProfile::class.java)
-            if (profile != null) {
-                ResponseService.Success(profile)
-            } else {
-                ResponseService.Error("Perfil no encontrado")
+    override suspend fun saveUserProfile(profile: UserProfile): ResponseService<Unit> =
+        withContext(Dispatchers.IO) {
+            try {
+                firestore.collection("users").document(profile.id).set(profile).await()
+                ResponseService.Success(Unit)
+            } catch (e: Exception) {
+                ResponseService.Error("Error al guardar el perfil: ${e.message}")
             }
-        } catch (e: Exception) {
-            ResponseService.Error("Error al obtener perfil: ${e.message}")
         }
-    }
 
-    override suspend fun updateUsername(userId: String, newUsername: String): ResponseService<Unit> = withContext(Dispatchers.IO) {
-        try {
-            firestore.collection("users").document(userId).update("userName", newUsername).await()
-            ResponseService.Success(Unit)
-        } catch (e: Exception) {
-            ResponseService.Error("Error al actualizar nombre de usuario: ${e.message}")
+    override suspend fun getUserProfile(userId: String): ResponseService<UserProfile> =
+        withContext(Dispatchers.IO) {
+            try {
+                val document = firestore.collection("users").document(userId).get().await()
+                val profile = document.toObject(UserProfile::class.java)
+                if (profile != null) ResponseService.Success(profile)
+                else ResponseService.Error("No se encontró el perfil del usuario")
+            } catch (e: Exception) {
+                ResponseService.Error(e.localizedMessage ?: "Error de conexión")
+            }
         }
-    }
 }
