@@ -3,13 +3,13 @@
     <item
         android:id="@+id/homeFragment"
         android:icon="@drawable/ic_home_black_24dp"
-        android:title="Home" />
+        android:title="Inicio" />
     <item
-        android:id="@+id/searchFragment"
-        android:icon="@android:drawable/ic_menu_search"
-        android:title="Buscar" />
+        android:id="@+id/favoritesFragment"
+        android:icon="@drawable/ic_favorite_border"
+        android:title="Favoritos" />
     <item
         android:id="@+id/profileFragment"
         android:icon="@drawable/ic_person"
-        android:title="User" />
+        android:title="Perfil" />
 </menu>

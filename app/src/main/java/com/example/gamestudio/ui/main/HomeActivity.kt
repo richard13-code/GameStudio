@@ -22,23 +22,24 @@ class HomeActivity : AppCompatActivity(), FragmentCommunicator {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment_home) as NavHostFragment
-        val navController = navHostFragment.navController
-
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment_home) as NavHostFragment
+        val navController = navHostFragment.navController
         binding.bottomNavigation.setupWithNavController(navController)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            manageBottomNavigation(destination.id != R.id.gameDetailFragment)
+        }
     }
 
     override fun manageLoader(isVisible: Boolean) {
-        // Si añades un ProgressBar o Lottie en activity_home.xml con id 'loaderView',
-        // descomenta la siguiente línea:
-        // binding.loaderView.isVisible = isVisible
+        binding.loaderView.isVisible = isVisible
     }
 
     override fun manageBottomNavigation(isVisible: Boolean) {

@@ -1,15 +1,16 @@
 package com.example.gamestudio
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.navigation.fragment.NavHostFragment
 import com.example.gamestudio.core.FragmentCommunicator
-import com.example.gamestudio.databinding.ActivityHomeBinding
 import com.example.gamestudio.databinding.ActivityMainBinding
+import com.example.gamestudio.ui.main.HomeActivity
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity(), FragmentCommunicator {
 
@@ -21,19 +22,23 @@ class MainActivity : AppCompatActivity(), FragmentCommunicator {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        if (FirebaseAuth.getInstance().currentUser != null) {
+            startActivity(Intent(this, HomeActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            })
+            return
         }
     }
 
     override fun manageLoader(isVisible: Boolean) {
         binding.loaderView.isVisible = isVisible
-        // Si tienes un loader en activity_home.xml, ponlo aquí
-        // binding.loaderView.isVisible = isVisible
     }
 
-    override fun manageBottomNavigation(isVisible: Boolean) {
-    }
+    override fun manageBottomNavigation(isVisible: Boolean) { /* No aplica en onboarding */ }
 }
