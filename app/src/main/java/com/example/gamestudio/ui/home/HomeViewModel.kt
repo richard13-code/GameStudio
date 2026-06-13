@@ -15,15 +15,38 @@ class HomeViewModel(
     private val service: GameService = GameRepository()
 ): ViewModel() {
 
-
     private val _gameState = MutableStateFlow<ResponseService<List<Game>>?>(null)
     val gameState: StateFlow<ResponseService<List<Game>>?> = _gameState.asStateFlow()
 
-    fun loadGames(limit: Int = 20) {
+    // 1. Guardamos la página actual en el ViewModel (empieza en la 1)
+    private var currentPage = 1
+
+    // 2. Modificamos la función para que use la página actual
+    fun loadGames() {
         viewModelScope.launch {
             _gameState.value = ResponseService.Loading
-            val result = service.getGames(limit)
+
+            // Aquí le pasas la página actual a tu servicio en lugar del límite
+            // (Asegúrate de que tu GameRepository acepte el parámetro 'page')
+            val result = service.getGames(page = currentPage, pageSize = 20)
             _gameState.value = result
         }
     }
+
+    // 3. Función para el botón "Siguiente"
+    fun nextPage() {
+        currentPage++
+        loadGames() // Vuelve a pedir los datos a la API pero con la nueva página
+    }
+
+    // 4. Función para el botón "Anterior"
+    fun previousPage() {
+        if (currentPage > 1) {
+            currentPage--
+            loadGames()
+        }
+    }
+
+    // Opcional por si necesitas saber en qué página vas en la interfaz
+    fun getCurrentPage(): Int = currentPage
 }

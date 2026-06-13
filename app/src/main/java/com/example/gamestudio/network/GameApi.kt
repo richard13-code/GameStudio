@@ -10,6 +10,7 @@ interface GameApi {
     @GET("games")
     suspend fun getGames(
         @Query("key") apiKey: String = BuildConfig.RAWG_API_KEY,
+        @Query("page") page: Int? = 1,          // <-- AGREGA ESTA LÍNEA AQUÍ
         @Query("page_size") pageSize: Int? = 20,
         @Query("search") search: String? = null
     ): Response<GameResponse>

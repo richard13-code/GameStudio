@@ -5,5 +5,9 @@ import com.example.gamestudio.model.Game
 
 interface GameService {
 
-    suspend fun getGames (limit: Int= 20): ResponseService<List<Game>>
+    // Cambiamos 'limit' por los parámetros reales de paginación de RAWG
+    suspend fun getGames(
+        page: Int = 1,
+        pageSize: Int = 20
+    ): ResponseService<List<Game>>
 }

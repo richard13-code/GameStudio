@@ -33,5 +33,7 @@
     <string name="logout">Cerrar sesión</string>
 
     <string name="searchbar_hint">Buscar juegos..."</string>
+    <string name="Next">Siguiente</string>
+    <string name="Previous">Anterior</string>
 
 </resources>

@@ -12,13 +12,14 @@ class GameRepository : GameService {
 
     private val api = ApiClient.gameApi
 
-    override suspend fun getGames(limit: Int): ResponseService<List<Game>> =
+    override suspend fun getGames(page: Int, pageSize: Int): ResponseService<List<Game>> =
         withContext(Dispatchers.IO) {
             try {
-                // Pasamos la API KEY explícitamente desde BuildConfig
+
                 val response = api.getGames(
                     apiKey = BuildConfig.RAWG_API_KEY,
-                    pageSize = limit
+                    page = page,
+                    pageSize = pageSize
                 )
 
                 if (response.isSuccessful) {
@@ -32,7 +33,6 @@ class GameRepository : GameService {
                     ResponseService.Error("Error del servidor: ${response.code()}")
                 }
             } catch (e: Exception) {
-                // Imprimimos el error en consola para debuggear mejor
                 e.printStackTrace()
                 ResponseService.Error("Error de conexión: ${e.localizedMessage}")
             }
