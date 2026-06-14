@@ -43,5 +43,7 @@ glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "gl
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp"}
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinParcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 firebase = {id = "com.google.gms.google-services", version.ref = "firebase"}
 
