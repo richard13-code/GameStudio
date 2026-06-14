@@ -6,7 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.navigation.fragment.NavHostFragment
 import com.example.gamestudio.core.FragmentCommunicator
+import com.example.gamestudio.databinding.ActivityHomeBinding
 import com.example.gamestudio.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), FragmentCommunicator {
@@ -25,7 +27,13 @@ class MainActivity : AppCompatActivity(), FragmentCommunicator {
             insets
         }
     }
+
     override fun manageLoader(isVisible: Boolean) {
         binding.loaderView.isVisible = isVisible
+        // Si tienes un loader en activity_home.xml, ponlo aquí
+        // binding.loaderView.isVisible = isVisible
+    }
+
+    override fun manageBottomNavigation(isVisible: Boolean) {
     }
 }

@@ -20,4 +20,20 @@
     <string name="Registrarse">Únete y empieza tu aventura</string>
     <string name="Desc">Flecha de regreso</string>
 
+    <string name="my_account">Mi cuenta</string>
+    <string name="user">Usuario</string>
+    <string name="full_name">Nombre completo</string>
+    <string name="items_in_list">Juegos guardados</string>
+    <string name="saved_titles">en tu biblioteca</string>
+    <string name="personal_info_header">Información personal</string>
+    <string name="cellphone">Teléfono</string>
+    <string name="tap_to_edit">Toca para editar</string>
+    <string name="settings">Configuración</string>
+    <string name="settings_desc">Notificaciones, seguridad, idioma</string>
+    <string name="logout">Cerrar sesión</string>
+
+    <string name="searchbar_hint">Buscar juegos..."</string>
+    <string name="Next">Siguiente</string>
+    <string name="Previous">Anterior</string>
+
 </resources>

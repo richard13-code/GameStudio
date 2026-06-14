@@ -1,0 +1,122 @@
+package com.example.gamestudio.ui.detail
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.example.gamestudio.R
+import com.example.gamestudio.core.ResponseService
+import com.example.gamestudio.databinding.FragmentGameDetailBinding
+import com.example.gamestudio.model.Game
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.launch
+
+class GameDetailFragment : Fragment() {
+
+    private var _binding: FragmentGameDetailBinding? = null
+    private val binding get() = _binding!!
+    private val viewModel by viewModels<GameDetailViewModel>()
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentGameDetailBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val gameId = arguments?.getInt("gameId") ?: run {
+            findNavController().navigateUp()
+            return
+        }
+
+        binding.btnBack.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
+        binding.btnFavorite.setOnClickListener {
+            val game = (viewModel.detailState.value as? ResponseService.Success)?.data
+            if (game != null) viewModel.toggleFavorite(game)
+        }
+
+        observeViewModel()
+        viewModel.loadDetail(gameId)
+    }
+
+    private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                launch {
+                    viewModel.detailState.collect { state ->
+                        when (state) {
+                            is ResponseService.Loading -> {
+                                binding.progressBar.visibility = View.VISIBLE
+                                binding.contentGroup.visibility = View.GONE
+                            }
+                            is ResponseService.Success -> {
+                                binding.progressBar.visibility = View.GONE
+                                binding.contentGroup.visibility = View.VISIBLE
+                                bindGame(state.data)
+                            }
+                            is ResponseService.Error -> {
+                                binding.progressBar.visibility = View.GONE
+                                Snackbar.make(binding.root, state.error, Snackbar.LENGTH_LONG)
+                                    .show()
+                            }
+                            null -> {}
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.isFavorite.collect { isFav ->
+                        binding.btnFavorite.setImageResource(
+                            if (isFav) R.drawable.ic_favorite_filled
+                            else R.drawable.ic_favorite_border
+                        )
+                    }
+                }
+
+                launch {
+                    viewModel.favoriteMsg.collect { msg ->
+                        if (msg != null) {
+                            Snackbar.make(binding.root, msg, Snackbar.LENGTH_SHORT).show()
+                            viewModel.clearMsg()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun bindGame(game: Game) {
+        binding.tvGameTitle.text = game.name
+        binding.tvReleased.text = "Lanzamiento: ${game.released ?: "Desconocido"}"
+        binding.tvRating.text = "⭐ ${game.rating}"
+        binding.tvMetacritic.text =
+            if (game.metacritic != null) "Metacritic: ${game.metacritic}" else ""
+        binding.tvGenres.text = game.genres?.joinToString(", ") { it.name } ?: ""
+        binding.tvDescription.text = game.descriptionRaw ?: "Sin descripción disponible"
+        Glide.with(binding.ivCover)
+            .load(game.backgroundImage)
+            .placeholder(R.drawable.ic_launcher_background)
+            .centerCrop()
+            .into(binding.ivCover)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}

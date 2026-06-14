@@ -7,36 +7,51 @@ import androidx.lifecycle.viewModelScope
 import com.example.gamestudio.core.AuthRepository
 import com.example.gamestudio.core.ResponseService
 import com.example.gamestudio.onboarding.personal.model.UserProfile
+import com.example.gamestudio.repository.FavoritesRepository
+import com.example.gamestudio.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
 
-    private val repository = AuthRepository()
+    private val userRepository = UserRepository()
+    private val favoritesRepository = FavoritesRepository()
     private val auth = FirebaseAuth.getInstance()
 
-    private val _userProfile = MutableLiveData<ResponseService<UserProfile>>()
-    val userProfile: LiveData<ResponseService<UserProfile>> = _userProfile
+    private val _userProfileState = MutableStateFlow<ResponseService<UserProfile>?>(null)
+    val userProfileState: StateFlow<ResponseService<UserProfile>?> = _userProfileState.asStateFlow()
 
-    private val _updateStatus = MutableLiveData<ResponseService<Unit>>()
-    val updateStatus: LiveData<ResponseService<Unit>> = _updateStatus
+    private val _savedGamesCount = MutableStateFlow(0)
+    val savedGamesCount: StateFlow<Int> = _savedGamesCount.asStateFlow()
 
-    fun fetchUserProfile() {
-        val userId = auth.currentUser?.uid ?: return
+    init {
+        observeFavoritesCount()
+    }
+
+    private fun observeFavoritesCount() {
         viewModelScope.launch {
-            _userProfile.value = ResponseService.Loading
-            val result = repository.getUserProfile(userId)
-            _userProfile.value = result
+            favoritesRepository.getFavoritesFlow().collectLatest { response ->
+                if (response is ResponseService.Success) {
+                    _savedGamesCount.value = response.data.size
+                }
+            }
         }
     }
 
-    fun updateUsername(newUsername: String) {
-        if (newUsername.isBlank()) return
-        val userId = auth.currentUser?.uid ?: return
-        viewModelScope.launch {
-            _updateStatus.value = ResponseService.Loading
-            val result = repository.updateUsername(userId, newUsername)
-            _updateStatus.value = result
+    fun fetchUserProfile() {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            viewModelScope.launch {
+                _userProfileState.value = ResponseService.Loading
+                val result = userRepository.getUserInfo(currentUser.uid)
+                _userProfileState.value = result
+            }
+        } else {
+            _userProfileState.value = ResponseService.Error("No hay sesión activa")
         }
     }
 }
