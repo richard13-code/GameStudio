@@ -32,6 +32,12 @@ class HomeFragment : Fragment() {
         findNavController().navigate(R.id.action_homeFragment_to_gameDetailFragment, bundle)
     }
 
+    private val searchAdapter = GameAdapter { game ->
+        val bundle = bundleOf("gameId" to game.id)
+        findNavController().navigate(R.id.action_homeFragment_to_gameDetailFragment, bundle)
+        binding.searchView.hide()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -40,6 +46,10 @@ class HomeFragment : Fragment() {
         communicator = requireActivity() as FragmentCommunicator
         binding.rvGames.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.rvGames.adapter = adapter
+
+        binding.rvSearchResults.layoutManager = GridLayoutManager(requireContext(), 2)
+        binding.rvSearchResults.adapter = searchAdapter
+
         setupSearch()
         setupPaginationButtons()
         observeState()
@@ -48,9 +58,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupSearch() {
-        binding.searchBar.setOnClickListener {
-            binding.searchView.show()
-        }
+        binding.searchView.setupWithSearchBar(binding.searchBar)
 
         binding.searchView.addTransitionListener { _, _, newState ->
             if (newState == SearchView.TransitionState.HIDDEN) {
@@ -87,6 +95,7 @@ class HomeFragment : Fragment() {
                             binding.btnSiguiente.isEnabled = true
                             binding.btnAnterior.isEnabled = viewModel.getCurrentPage() > 1
                             adapter.submitList(state.data)
+                            searchAdapter.submitList(state.data)
                             binding.rvGames.post {
                                 val nestedScroll = binding.rvGames.parent.parent
                                         as? androidx.core.widget.NestedScrollView
