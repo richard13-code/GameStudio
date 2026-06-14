@@ -1,8 +1,8 @@
 package com.example.gamestudio.model
 
+import android.os.Parcel
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import kotlinx.parcelize.Parcelize
 
 data class GameResponse(
     @SerializedName("count") val count: Int,
@@ -10,7 +10,6 @@ data class GameResponse(
     @SerializedName("results") val results: List<Game>
 )
 
-@Parcelize
 data class Game(
     @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String,
@@ -20,13 +19,58 @@ data class Game(
     @SerializedName("metacritic") val metacritic: Int? = null,
     @SerializedName("description_raw") val descriptionRaw: String? = null,
     @SerializedName("genres") val genres: List<Genre>? = null
-) : Parcelable
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readInt(),
+        parcel.readString() ?: "",
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readDouble(),
+        parcel.readValue(Int::class.java.classLoader) as? Int,
+        parcel.readString(),
+        parcel.createTypedArrayList(Genre.CREATOR)
+    )
 
-@Parcelize
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeInt(id)
+        parcel.writeString(name)
+        parcel.writeString(released)
+        parcel.writeString(backgroundImage)
+        parcel.writeDouble(rating)
+        parcel.writeValue(metacritic)
+        parcel.writeString(descriptionRaw)
+        parcel.writeTypedList(genres)
+    }
+
+    override fun describeContents(): Int = 0
+
+    companion object CREATOR : Parcelable.Creator<Game> {
+        override fun createFromParcel(parcel: Parcel): Game = Game(parcel)
+        override fun newArray(size: Int): Array<Game?> = arrayOfNulls(size)
+    }
+}
+
 data class Genre(
     @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String
-) : Parcelable
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readInt(),
+        parcel.readString() ?: ""
+    )
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeInt(id)
+        parcel.writeString(name)
+    }
+
+    override fun describeContents(): Int = 0
+
+    companion object CREATOR : Parcelable.Creator<Genre> {
+        override fun createFromParcel(parcel: Parcel): Genre = Genre(parcel)
+        override fun newArray(size: Int): Array<Genre?> = arrayOfNulls(size)
+    }
+}
 
 data class FavoriteGame(
     val id: Int = 0,

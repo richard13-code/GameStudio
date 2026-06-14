@@ -17,7 +17,7 @@ coroutinesCore = "1.7.3"
 retrofit = "2.11.0"
 okhttploggin= "4.12.0"
 glide = "4.16.0"
-kotlin = "2.0.0"
+kotlin = "2.1.20"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

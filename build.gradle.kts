@@ -2,5 +2,6 @@
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlinAndroid) apply false
+    alias(libs.plugins.kotlinParcelize) apply false
     alias(libs.plugins.firebase) apply false
 }
