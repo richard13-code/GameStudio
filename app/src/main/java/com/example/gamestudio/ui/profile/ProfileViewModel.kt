@@ -7,20 +7,40 @@ import androidx.lifecycle.viewModelScope
 import com.example.gamestudio.core.AuthRepository
 import com.example.gamestudio.core.ResponseService
 import com.example.gamestudio.onboarding.personal.model.UserProfile
+import com.example.gamestudio.repository.FavoritesRepository
 import com.example.gamestudio.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
 
     private val userRepository = UserRepository()
+    private val favoritesRepository = FavoritesRepository()
     private val auth = FirebaseAuth.getInstance()
 
     private val _userProfileState = MutableStateFlow<ResponseService<UserProfile>?>(null)
     val userProfileState: StateFlow<ResponseService<UserProfile>?> = _userProfileState.asStateFlow()
+
+    private val _savedGamesCount = MutableStateFlow(0)
+    val savedGamesCount: StateFlow<Int> = _savedGamesCount.asStateFlow()
+
+    init {
+        observeFavoritesCount()
+    }
+
+    private fun observeFavoritesCount() {
+        viewModelScope.launch {
+            favoritesRepository.getFavoritesFlow().collectLatest { response ->
+                if (response is ResponseService.Success) {
+                    _savedGamesCount.value = response.data.size
+                }
+            }
+        }
+    }
 
     fun fetchUserProfile() {
         val currentUser = auth.currentUser

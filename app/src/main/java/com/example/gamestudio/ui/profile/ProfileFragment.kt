@@ -54,16 +54,24 @@ class ProfileFragment : Fragment() {
     private fun observeState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.userProfileState.collect { response ->
-                    when (response) {
-                        is ResponseService.Loading -> { }
-                        is ResponseService.Success -> {
-                            updateUI(response.data)
+                launch {
+                    viewModel.userProfileState.collect { response ->
+                        when (response) {
+                            is ResponseService.Loading -> { }
+                            is ResponseService.Success -> {
+                                updateUI(response.data)
+                            }
+                            is ResponseService.Error -> {
+                                Toast.makeText(requireContext(), response.error, Toast.LENGTH_SHORT).show()
+                            }
+                            null -> {}
                         }
-                        is ResponseService.Error -> {
-                            Toast.makeText(requireContext(), response.error, Toast.LENGTH_SHORT).show()
-                        }
-                        null -> {}
+                    }
+                }
+
+                launch {
+                    viewModel.savedGamesCount.collect { count ->
+                        binding.tvStatValue.text = count.toString()
                     }
                 }
             }

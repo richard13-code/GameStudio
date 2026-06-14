@@ -23,8 +23,8 @@
     <string name="my_account">Mi cuenta</string>
     <string name="user">Usuario</string>
     <string name="full_name">Nombre completo</string>
-    <string name="items_in_list">Favoritos</string>
-    <string name="saved_titles">Ejercicios guardados</string>
+    <string name="items_in_list">Juegos guardados</string>
+    <string name="saved_titles">en tu biblioteca</string>
     <string name="personal_info_header">Información personal</string>
     <string name="cellphone">Teléfono</string>
     <string name="tap_to_edit">Toca para editar</string>
